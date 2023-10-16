@@ -68,6 +68,16 @@ jobs:
   #       echo "tag=$version" >> "$GITHUB_OUTPUT"
 
   - task: Docker@2
+    displayName: Build and push an image to container registry
+    inputs:
+      command: buildAndPush
+      repository: 'felipementel/api.model'
+      dockerfile: './src/API.Model/Dockerfile'
+      containerRegistry: 'docker-hub'
+      tags: |
+        latest
+
+  - task: Docker@2
     inputs:
       containerRegistry: 'docker-hub'
       repository: 'felipementel/api.model'
