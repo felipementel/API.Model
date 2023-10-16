@@ -56,11 +56,9 @@ jobs:
 
   - task: Docker@2
     inputs:
-      containerRegistry: 'dockerHub'
-      repository: 'docker.io'
+      containerRegistry: 'docker-hub'
+      repository: 'felipementel/api.model'
       command: 'login'
-      username: $(DOCKERHUB_USERNAME)
-      password: $(DOCKERHUB_TOKEN)
 
   - task: Bash@3
     inputs:
