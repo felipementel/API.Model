@@ -60,12 +60,12 @@ jobs:
       repository: 'felipementel/api.model'
       command: 'login'
 
-  - task: Bash@3
-    inputs:
-      targetType: 'inline'
-      script: |
-        version=$(sed -n 's/.*<Version>\(.*\)<\/Version>.*/\1/p' ./src/API.Model/API.Model.csproj)
-        echo "tag=$version" >> "$GITHUB_OUTPUT"
+  # - task: Bash@3
+  #   inputs:
+  #     targetType: 'inline'
+  #     script: |
+  #       version=$(sed -n 's/.*<Version>\(.*\)<\/Version>.*/\1/p' ./src/API.Model/API.Model.csproj)
+  #       echo "tag=$version" >> "$GITHUB_OUTPUT"
 
   - task: Docker@2
     inputs:
@@ -75,4 +75,3 @@ jobs:
       Dockerfile: './src/API.Model/Dockerfile'
       tags: |
         felipementel/api.model:latest
-        felipementel/api.model:$(version)
