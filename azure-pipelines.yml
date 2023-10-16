@@ -3,12 +3,6 @@ name: Docker Hub
 variables:
 - group: Env-Dev
 
-trigger:
-- main
-
-pr:
-- main
-
 jobs:
 - job: build_and_analyze
   pool:
@@ -22,16 +16,16 @@ jobs:
 
   - task: Cache@2
     inputs:
-      key: ${{ runner.os }}-sonar
+      key: 'sonar'
       path: ~\sonar\cache
 
   - task: Cache@2
     inputs:
-      key: ${{ runner.os }}-sonar-scanner
+      key: 'sonar-scanner'
       path: .\.sonar\scanner
 
   - task: PowerShell@2
-    condition: ne(variables['steps.cache-sonar-scanner.outputs.cache-hit'], 'true')
+    condition: ne(variables['cache-sonar-scanner'], 'true')
     inputs:
       targetType: 'inline'
       script: |
@@ -48,8 +42,9 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        .\.sonar\scanner\dotnet-sonarscanner begin /k:"felipementel_API.Model" /o:"felipementel" /d:sonar.token=$(SONAR_TOKEN) /d:sonar.host.url="https://sonarcloud.io"
+        .\.sonar\scanner\dotnet-sonarscanner begin /k:"felipementel_API.Model" /o:"felipementel" /d:sonar.token=$(SONAR_TOKEN) /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
         dotnet run --project src/API.Model/API.Model.csproj --no-incremental
+        dotnet-coverage collect "dotnet test src" -f xml -o "coverage.xml"
         .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token=$(SONAR_TOKEN)
 
 - job: docker
@@ -77,9 +72,9 @@ jobs:
   - task: Docker@2
     inputs:
       containerRegistry: 'dockerHub'
-      repository: 'felipementel/cachorro.api'
+      repository: 'felipementel/api.model'
       command: 'buildAndPush'
       Dockerfile: './src/API.Model/Dockerfile'
       tags: |
-        felipementel/cachorro.api:latest
-        felipementel/cachorro.api:$(version)
+        felipementel/api.model:latest
+        felipementel/api.model:$(version)
