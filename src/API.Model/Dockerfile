@@ -11,7 +11,7 @@ COPY ["API.Model/API.Model.csproj", "API.Model/"]
 RUN dotnet restore "API.Model/API.Model.csproj"
 COPY . .
 WORKDIR "/src/API.Model"
-RUN dotnet build "API.Model.csproj" -c Release -o /app/build
+RUN dotnet build "API.Model.csproj" -c Release -o /app/build 
 
 FROM build AS publish
 RUN dotnet publish "API.Model.csproj" -c Release -o /app/publish /p:UseAppHost=false
