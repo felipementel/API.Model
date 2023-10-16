@@ -1,0 +1,85 @@
+name: Docker Hub
+
+variables:
+- group: Env-Dev
+
+trigger:
+- main
+
+pr:
+- main
+
+jobs:
+- job: build_and_analyze
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - task: UseJavaVersion@1
+    inputs:
+      version: '17'
+
+  - checkout: self
+
+  - task: Cache@2
+    inputs:
+      key: ${{ runner.os }}-sonar
+      path: ~\sonar\cache
+
+  - task: Cache@2
+    inputs:
+      key: ${{ runner.os }}-sonar-scanner
+      path: .\.sonar\scanner
+
+  - task: PowerShell@2
+    condition: ne(variables['steps.cache-sonar-scanner.outputs.cache-hit'], 'true')
+    inputs:
+      targetType: 'inline'
+      script: |
+        New-Item -Path .\.sonar\scanner -ItemType Directory
+        dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+
+  - task: PowerShell@2
+    inputs:
+      targetType: 'inline'
+      script: |
+        dotnet tool install --global dotnet-coverage
+
+  - task: PowerShell@2
+    inputs:
+      targetType: 'inline'
+      script: |
+        .\.sonar\scanner\dotnet-sonarscanner begin /k:"felipementel_API.Model" /o:"felipementel" /d:sonar.token=$(SONAR_TOKEN) /d:sonar.host.url="https://sonarcloud.io"
+        dotnet run --project src/API.Model/API.Model.csproj --no-incremental
+        .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token=$(SONAR_TOKEN)
+
+- job: docker
+  dependsOn: build_and_analyze
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - checkout: self
+
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'dockerHub'
+      repository: 'docker.io'
+      command: 'login'
+      username: $(DOCKERHUB_USERNAME)
+      password: $(DOCKERHUB_TOKEN)
+
+  - task: Bash@3
+    inputs:
+      targetType: 'inline'
+      script: |
+        version=$(sed -n 's/.*<Version>\(.*\)<\/Version>.*/\1/p' ./src/API.Model/API.Model.csproj)
+        echo "tag=$version" >> "$GITHUB_OUTPUT"
+
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'dockerHub'
+      repository: 'felipementel/cachorro.api'
+      command: 'buildAndPush'
+      Dockerfile: './src/API.Model/Dockerfile'
+      tags: |
+        felipementel/cachorro.api:latest
+        felipementel/cachorro.api:$(version)
