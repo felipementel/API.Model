@@ -22,14 +22,14 @@ namespace API.Model.Controllers
             return Ok(value);
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetIdAsync(Guid id)
         {
             return Ok();
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostAsync()
+        public async Task<IActionResult> PostAsync([FromBody] string id)
         {
             return Ok();
         }
