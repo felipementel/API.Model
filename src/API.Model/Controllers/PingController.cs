@@ -4,7 +4,7 @@ using System.Reflection;
 namespace API.Model.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("v1/ping")]
     public class PingController : ControllerBase
     {
         private readonly ILogger<PingController> _logger;
