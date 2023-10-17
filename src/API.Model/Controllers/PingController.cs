@@ -14,12 +14,36 @@ namespace API.Model.Controllers
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
+        [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
             var value = Assembly.GetExecutingAssembly().GetName().Version;
 
             return Ok(value);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetIdAsync(Guid id)
+        {
+            return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostAsync()
+        {
+            return Ok();
+        }
+
+        [HttpPatch]
+        public async Task<IActionResult> PathAsync()
+        {
+            return Ok();
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteAsync()
+        {
+            return Ok();
         }
     }
 }
